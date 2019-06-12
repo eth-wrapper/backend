@@ -34,10 +34,10 @@ let modelSchema = mongoose.Schema({
     }
 }, {timestamps: false});
 
-modelSchema.index(
-    { type: 1, user: 1},
-    {unique: true, partialFilterExpression: {user: {$exists: true}}}
-);
+// modelSchema.index(
+//     { type: 1, user: 1},
+//     {unique: true, partialFilterExpression: {user: {$exists: true}}}
+// );
 
 const Model = module.exports = mongoose.model('wallet', modelSchema);
 
