@@ -8,6 +8,11 @@ const Wallet = require('../database/mongooseModels/Wallet');
 /**
  * this function will called via cron job every hours
  */
+
+module.exports.generatePhrase = function(){
+    return bip39.generateMnemonic();
+}
+
 module.exports.fillPoolWithEmptyWallet = function(){
     // console.log('WalletPoolController.fillPoolWithEmptyWallet .....');
     Wallet.find({assigned: false, type: Wallet.TYPE_BITCOIN})

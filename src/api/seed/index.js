@@ -6,7 +6,7 @@ let router = Router();
 
 const nacl = require('tweetnacl');
 
-const deployWalletScript = require('../../../scripts/deploy_wallet');
+// const deployWalletScript = require('../../../scripts/deploy_wallet');
 
 router.all('/resources', function (req, res, next) {
   // initialize new 20 test wallets;
@@ -29,27 +29,27 @@ router.all('/resources', function (req, res, next) {
 });
 
 router.get('/deploy-wallet', function (req, res, next) {
-    Wallet.find({assigned: false})
-        .then(wallets => {
-            if(wallets.length < process.env.MIN_FREE_WALLET_COUNT){
-                deployWalletScript.run(function (address) {
-                    new Wallet({address}).save().then(()=>{
-                        res.send({success: true, address});
-                    })
-                        .catch(error => res.send({
-                            success: false,
-                            error
-                        }));
-                })
-            }else{
-                res.send({success: true, message: 'Wallet count is enough now.'})
-            }
-        }).catch(error => {
-            res.send({
-                success: false,
-                error
-            })
-    })
+    // Wallet.find({assigned: false})
+    //     .then(wallets => {
+    //         if(wallets.length < process.env.MIN_FREE_WALLET_COUNT){
+    //             deployWalletScript.run(function (address) {
+    //                 new Wallet({address}).save().then(()=>{
+    //                     res.send({success: true, address});
+    //                 })
+    //                     .catch(error => res.send({
+    //                         success: false,
+    //                         error
+    //                     }));
+    //             })
+    //         }else{
+    //             res.send({success: true, message: 'Wallet count is enough now.'})
+    //         }
+    //     }).catch(error => {
+    //         res.send({
+    //             success: false,
+    //             error
+    //         })
+    // })
 })
 
 module.exports = router;
