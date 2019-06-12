@@ -1,0 +1,19 @@
+
+HTTP_PORT=5501
+MONGOOSE_CS = "mongodb://localhost:45745/ethwrapper"
+JWT_AUTH_SECRET= "fhggrytetrtyet46564rtyetrye5465436"
+UPLOAD_SERVER_IP= '68.183.76.106'
+
+# BrightID variables
+SITE_AVATAR_PATH= "./data/site-avatar.jpg"
+SITE_PUBLIC_KEY= "12345678"
+SITE_NAME= "BTC-ETH"
+
+ETHEREUM_DEPOSIT_WALLET="0x84d88a51D5E3F2F2BDe5C86711264141E3A9A1E3"
+
+MIN_FREE_WALLET_COUNT=50
+
+# Master wallet seed phrase to create empty wallet addresses
+MASTER_WALLET_MNEMONIC="seed phrase ..."
+
+TEST_MODE=true
