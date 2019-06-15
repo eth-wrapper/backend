@@ -11,6 +11,13 @@ module.exports.normalizeAddress = function (coin, addr) {
     return networkModule.normalizeAddress(addr);
 }
 
+module.exports.validateWallet = function (coin, wallet) {
+    if(!wallet || wallet.length < 1)
+        return false;
+    let networkModule = getCoinModule(coin);
+    return networkModule.validateWallet(wallet);
+}
+
 module.exports.watchDeposit = function (coin, wallet) {
     let networkModule = getCoinModule(coin);
     return networkModule.watchDeposit(coin, wallet);

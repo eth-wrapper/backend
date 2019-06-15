@@ -2,7 +2,14 @@ const fs = require('fs');
 const path = require('path');
 
 let allModules = {};
-let allModuleNecessaryMethods = ['watchDeposit', 'watchTransactionStatus', 'sendCoin', 'getTransaction', 'normalizeAddress'];
+let allModuleNecessaryMethods = [
+    'watchDeposit',
+    'watchTransactionStatus',
+    'sendCoin',
+    'getTransaction',
+    'normalizeAddress',
+    'validateWallet'
+];
 
 var normalizedPath = path.join(__dirname, "./modules");
 fs.readdirSync(normalizedPath).forEach(function(file) {

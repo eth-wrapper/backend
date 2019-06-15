@@ -33,15 +33,26 @@ module.exports.unreadMessages = function (req, res, next) {
         })
 }
 module.exports.getSwapList = function (req, res, next) {
+    let {page=0, limit=5} = req.body;
+    let totalCount = 0
     let filters = {
         // status: {$ne: 'new'}
-    }
-    Swap.find(filters)
-        .sort({createdAt: -1})
+    };
+    Swap.countDocuments(filters)
+        .then(n => {
+            totalCount = n;
+            return Swap.find(filters)
+                .sort({createdAt: -1})
+                .skip(page * limit)
+                .limit(limit);
+        })
         .then(swapList => {
             res.send({
                 success: true,
-                swapList
+                swapList,
+                totalCount,
+                page,
+                limit
             })
         })
         .catch(error => {

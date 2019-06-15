@@ -26,18 +26,7 @@ module.exports.watchToConfirmDeposit = watchToConfirmNewSwap;
 module.exports.watchToConfirmWithdraw = watchSwapWithdrawToConfirm;
 
 function conversionRate(deposit, receiving){
-    let conversion = {
-        'TST-KBTC': 1,
-        'KBTC-TST': 1,
-        'BTC-TT1': 1,
-        'TT1-BTC': 1,
-        'TST-TT1':1,
-        'TT1-TST': 1,
-        'USDT-KTTR': 1,
-        'KTTR-USDT': 1,
-    };
-    let key = `${deposit.code}-${receiving.code}`;
-    return (conversion[key] !== undefined ? conversion[key] : 0);
+    return 1;
 }
 
 function getCoinList(req, res, next){
@@ -58,24 +47,28 @@ function getCoinList(req, res, next){
 }
 
 function getConversionRate(req, res, next) {
-    Coin.find({})
-        .then(coinList => {
-            let deposit = coinList.find(item => item.code === req.body.deposit.toUpperCase());
-            let receiving = coinList.find(item => item.code === req.body.receiving.toUpperCase());
-            if(!deposit || !receiving)
-                return res.send({success: false, message: "Deposit or receiving code is invalid"})
-            res.send({
-                success: true,
-                rate: 1 //conversionRate(deposit, receiving)
-            })
-        })
-        .catch(error => {
-            res.send({
-                success: false,
-                message: error.message || "Server side error",
-                rate: 0
-            })
-        })
+    return res.send({
+        success: true,
+        rate: 1 //conversionRate(deposit, receiving)
+    })
+    // Coin.find({})
+    //     .then(coinList => {
+    //         let deposit = coinList.find(item => item.code === req.body.deposit.toUpperCase());
+    //         let receiving = coinList.find(item => item.code === req.body.receiving.toUpperCase());
+    //         if(!deposit || !receiving)
+    //             return res.send({success: false, message: "Deposit or receiving code is invalid"})
+    //         res.send({
+    //             success: true,
+    //             rate: 1 //conversionRate(deposit, receiving)
+    //         })
+    //     })
+    //     .catch(error => {
+    //         res.send({
+    //             success: false,
+    //             message: error.message || "Server side error",
+    //             rate: 0
+    //         })
+    //     })
 }
 
 function getDepositWallet(coin, user){
@@ -109,7 +102,7 @@ function registerNewSwap(req, res, next) {
                 throw {success: false, message: "Receiving coin invalid"};
             if(amount <= 0)
                 throw {success: false, message: "Amount most be a positive number"};
-            if(!recipientWallet || recipientWallet.length < 1)
+            if(!CoinController.validateWallet(receivingCoin, recipientWallet))
                 throw {success: false, message: "Recipient wallet address invalid"};
 
             return getDepositWallet(depositCoin, currentUser);

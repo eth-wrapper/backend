@@ -4,15 +4,21 @@
  */
 
 const fetch = require('node-fetch');
+const bitcoinaddress = require('bitcoin-address');
 
 module.exports.watchDeposit = watchDeposit;
 module.exports.watchTransactionStatus = watchTransactionStatus;
 module.exports.sendCoin = sendCoin;
 module.exports.getTransaction = getTransaction;
+module.exports.validateWallet = validateWallet;
 module.exports.normalizeAddress = normalizeAddress;
 
 function normalizeAddress(addr) {
     return addr;
+}
+
+function validateWallet(address){
+    return bitcoinaddress.validate(address, process.env.TEST_MODE ? 'testnet' : undefined);
 }
 
 function watchDeposit(coin, wallet) {

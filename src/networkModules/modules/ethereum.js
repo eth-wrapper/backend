@@ -10,10 +10,15 @@ const ERC20_INPUT_LENGTH = 10 + 64 + 64;
 const ERC20_METHOD_TRANSFER = '0xa9059cbb';
 
 
+module.exports.validateWallet = validateWallet;
 module.exports.normalizeAddress = normalizeAddress;
 
 function normalizeAddress(addr) {
     return addr.toLowerCase();
+}
+
+function validateWallet(address){
+    return web3.utils.isAddress(address);
 }
 
 module.exports.watchDeposit = function (coin, wallet) {
