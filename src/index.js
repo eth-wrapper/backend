@@ -26,7 +26,7 @@ let io = initSocket(app.server);
 
 app.use(express.static('public'));
 app.use('/uploads', /*forceAuthorized,*/ express.static('uploads'));
-app.use('/scripts/socketio/', /*forceAuthorized,*/ express.static('node_modules/socket.io-client/dist'));
+app.use('/scripts/socketio/', express.static('node_modules/socket.io-client/dist'));
 
 // logger
 app.use(morgan('dev'));

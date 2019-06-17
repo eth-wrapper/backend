@@ -3,6 +3,7 @@ const waletPoolCronJob = require('./walletPoolFillingCronJon');
 const watchToDetectNewSwap = require('./watchToDetectNewSwapCronJob');
 const watchToConfirmWithdraw = require('./watchToConfirmWithdrawCronJob');
 const watchToConfirmDeposit = require('./watchToConfirmDepositCronJob');
+const ethereumTokenAutoMint = require('./ethereumTokenAutoMintCronJob');
 
 /**
  * Seconds: 0-59
@@ -27,6 +28,7 @@ function init() {
     watchToDetectNewSwap.start();
     watchToConfirmDeposit.start();
     watchToConfirmWithdraw.start();
+    ethereumTokenAutoMint.start();
 }
 
 module.exports = {

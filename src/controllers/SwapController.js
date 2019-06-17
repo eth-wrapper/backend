@@ -24,6 +24,7 @@ module.exports.setEthereumDeposit = setEthereumDeposit;
 module.exports.watchToDetectNewSwap = watchToDetectNewSwap;
 module.exports.watchToConfirmDeposit = watchToConfirmNewSwap;
 module.exports.watchToConfirmWithdraw = watchSwapWithdrawToConfirm;
+module.exports.ethereumTokenAutoMint = ethereumTokenAutoMint;
 
 function conversionRate(deposit, receiving){
     return 1;
@@ -73,7 +74,7 @@ function getConversionRate(req, res, next) {
 
 function getDepositWallet(coin, user){
     if(coin.network === 'ethereum'){
-        return Promise.resolve(process.env.ETHEREUM_DEPOSIT_WALLET);
+        return Promise.resolve(process.env.ETHEREUM_TOKENS_ADMIN_WALLET);
     }else{
         if(user[`${coin.walletType}Wallet`] === undefined){
             console.log(`assigning new wallet [${coin.walletType}Wallet] to user`);
@@ -341,5 +342,48 @@ function handleSwapWithdrawConfirmation(swap){
         })
         .catch(error => {
             console.log(error);
+        })
+}
+
+function ethereumTokenAutoMint() {
+    // let watchPromises = [];
+    let swap = null;
+    return Swap.findOne({
+        status: Swap.STATUS_DEPOSIT_CONFIRMED,
+        "receivingCoin.network": "ethereum",
+        "receivingCoin.info.mintCalled": {$exists: false}
+    })
+        .then(_swap => {
+            if(!_swap)
+                throw {message: "No swap to mint"};
+            swap = _swap;
+            return Swap.updateOne({_id: swap._id},{$set:{
+                    "receivingCoin.info.mintCalled": true
+                }},{upsert: false})
+        })
+        .then(() => {
+            return CoinController.networkModules.ethereum.mint(
+                swap.receivingCoin.info.contractAddress,
+                swap.recipientWallet,
+                swap.receivingAmount
+            )
+        })
+        .then(txHash => {
+            if(!txHash){
+                throw {message: 'mint failed'}
+            }
+            console.log(`Ethereum [${swap.receivingCoin.code}] mint tx_hash: [${txHash}]`);
+            swap.status = Swap.STATUS_WITHDRAW_SENT;
+            swap.receiveTxHash = txHash;
+            return swap.save();
+        })
+        .then(() => {
+            console.log('Swap mint complete successfully');
+        })
+        .catch(error => {
+            console.log(error.message || 'error in mint');
+            if(error.message !== "No swap to mint"){
+                console.error(error);
+            }
         })
 }

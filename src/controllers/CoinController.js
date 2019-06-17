@@ -37,3 +37,5 @@ module.exports.getTransaction = function (coin, txHash) {
     let networkModule = getCoinModule(coin);
     return networkModule.getTransaction(txHash);
 }
+
+module.exports.networkModules = networkModulesList;

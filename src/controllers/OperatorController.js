@@ -1,5 +1,5 @@
 const Trade = require('../database/mongooseModels/Trade');
-const TradeMessage = require('../database/mongooseModels/TradeMessage');
+const Coin = require('../database/mongooseModels/Coin');
 const Swap = require('../database/mongooseModels/Swap');
 const CoinController = require('./CoinController');
 
@@ -65,36 +65,15 @@ module.exports.getSwapList = function (req, res, next) {
 }
 module.exports.setSwapWithdraw = function (req, res, next) {
     let {swap, txHash} = req.body;
-    let tx = null;
-    let coin = swap.receivingCoin;
-    let wallet = CoinController.normalizeAddress(coin, swap.recipientWallet);
-    CoinController.getTransaction(swap.receivingCoin, txHash)
-        .then(_tx => {
-            tx = _tx;
-            if(!tx)
-                throw {message: 'Transaction not found'};
-            if(tx.to[wallet] === undefined) {
-                throw {message: "Transaction target address not matched with swap"};
-            }
-            if(swap.receivingAmount != tx.to[wallet].decimal)
-                throw {message: "Transaction amount not matched with swap receiving amount"};
 
-            if(coin.code !== tx.coin && coin.contractAddress && CoinController.normalizeAddress(coin, coin.contractAddress) !== tx.coin){
-                console.log(`comparing [${CoinController.normalizeAddress(coin, coin.contractAddress) }] with [${tx.coin}]`);
-                throw {message: "Transaction coin not matched with swap receiving coin"};
-            }
-
-            swap.status = Swap.STATUS_WITHDRAW_SENT;
-            swap.receiveTxHash = txHash;
-
-            return swap.save();
-        })
+    swap.status = Swap.STATUS_WITHDRAW_SENT;
+    swap.receiveTxHash = txHash;
+    swap.save()
         .then(() => {
             res.send({
                 success: true,
                 body: req.body,
-                swap,
-                transaction: tx
+                swap
             });
         })
         .catch(error => {

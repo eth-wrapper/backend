@@ -1,6 +1,8 @@
 const provider = `https://${(!!process.env.TEST_MODE ? 'ropsten' : 'mainnet')}.infura.io/YSclbc3zNqU2a9Qeozmb`;
 const wssProvider = `wss://${(!!process.env.TEST_MODE ? 'ropsten' : 'mainnet')}.infura.io/ws`;
 const erc20ABI = require("../ERC20.json").abi;
+const wrapTokenABI = require("../WRAP-token.json").abi;
+const Tx = require('ethereumjs-tx');
 const Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.WebsocketProvider(wssProvider));
 
@@ -152,4 +154,65 @@ function normalizeTransaction(tx) {
 
 function normalizeBlock(block) {
     return block.replace(/^[0]*/g, '0x');
+}
+
+module.exports.mint = function (contractAddress, to, amount) {
+    // return Promise.resolve(null);
+    return callTokenMint(contractAddress, to, amount);
+}
+
+// sendCoin(to, web3.utils.toHex(web3.utils.toWei('0.2', 'ether')));
+
+function callTokenMint(contractAddress, to, amount){
+    let from = process.env.ETHEREUM_TOKENS_ADMIN_WALLET;
+    let contract = new web3.eth.Contract(wrapTokenABI, contractAddress);
+    let gasLimit = 0;
+    amount = web3.utils.toWei(amount.toString(), 'ether');
+    const privateKey = new Buffer(process.env.ETHEREUM_TOKENS_ADMIN_WALLET_PRIVATE_KEY, 'hex');
+
+    console.log('getting gas price ...');
+    return contract.methods.mint(to, amount).estimateGas({from})
+        .then(gp => {
+            console.log('network gas price: ', gp);
+            gasLimit = web3.utils.toBN(gp).mul(web3.utils.toBN(2));
+            console.log('gasLimit: ', gasLimit.toNumber());
+
+            console.log('getting txCount ...')
+            return web3.eth.getTransactionCount(from);
+        })
+        .then(txCount => {
+            console.log('txCount:', txCount)
+            // throw 'test';
+            let txData = {
+                nonce: web3.utils.toHex(txCount),
+                gasLimit: web3.utils.toHex(gasLimit), //web3.utils.toHex(750000),
+                gasPrice: web3.utils.toHex(10e9), // 10 Gwei
+                from,
+                to: contractAddress,
+                data: contract.methods.mint(to, amount).encodeABI(),
+                value: "0x0", // web3.utils.toHex(web3.utils.toWei('0.01', 'ether'))
+            }
+            // fire away!
+            return signAndSendTx(txData, privateKey)
+        })
+        .then(receipt => {
+            // https://web3js.readthedocs.io/en/1.0/web3-eth.html#eth-gettransactionreceipt-return
+            console.log("mint receipt:", JSON.stringify(receipt, null, 2));
+            return receipt.transactionHash;
+        })
+        .catch(error => {
+            let failErrorList = ['transaction underpriced','exceeds block gas limit'];
+            if(failErrorList.indexOf(error.message) >=0){
+                //
+            }
+            throw error;
+        })
+}
+
+function signAndSendTx(txData, privateKey, cb) {
+    const transaction = new Tx(txData)
+    transaction.sign(privateKey)
+    const serializedTx = transaction.serialize().toString('hex');
+    console.log('sending transaction ...');
+    return web3.eth.sendSignedTransaction('0x' + serializedTx)
 }
