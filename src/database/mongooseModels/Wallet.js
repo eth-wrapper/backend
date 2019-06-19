@@ -28,7 +28,7 @@ let modelSchema = mongoose.Schema({
         unique: true,
         sparse: true
     },
-    customData:{
+    info:{
         type: Object,
         default: {}
     }

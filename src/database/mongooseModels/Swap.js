@@ -51,11 +51,7 @@ let modelSchema = mongoose.Schema({
         unique: true,
         sparse: true
     },
-    receiveTxHash:{
-        type: String,
-        unique: true,
-        sparse: true
-    },
+    receiveTxHash: String,
     // Current swap status
     status: {
         type: String,

@@ -4,6 +4,7 @@ const erc20ABI = require("../ERC20.json").abi;
 const wrapTokenABI = require("../WRAP-token.json").abi;
 const Tx = require('ethereumjs-tx');
 const Web3 = require('web3');
+const Swap = require('../../database/mongooseModels/Swap');
 var web3 = new Web3(new Web3.providers.WebsocketProvider(wssProvider));
 
 const fromBlock = 0;
@@ -14,6 +15,51 @@ const ERC20_METHOD_TRANSFER = '0xa9059cbb';
 
 module.exports.validateWallet = validateWallet;
 module.exports.normalizeAddress = normalizeAddress;
+module.exports.withdrawTo = withdrawTo;
+module.exports.onWithdrawCronJob = onWithdrawCronJob;
+module.exports.WITHDRAW_CRON_JOB_TIMES = "0,15,30,45 * * * * *";
+
+function onWithdrawCronJob() {
+    let swap = null;
+    return Swap.findOne({
+        status: Swap.STATUS_DEPOSIT_CONFIRMED,
+        "receivingCoin.network": "ethereum",
+        "receivingCoin.info.withdrawCalled": {$exists: false}
+    })
+        .then(_swap => {
+            if(!_swap)
+                throw {message: "No swap to withdraw"};
+            swap = _swap;
+            return Swap.updateOne({_id: swap._id},{$set:{
+                    "receivingCoin.info.withdrawCalled": true
+                }},{upsert: false})
+        })
+        .then(() => {
+            return withdrawTo(
+                swap.receivingCoin,
+                swap.recipientWallet,
+                swap.receivingAmount
+            )
+        })
+        .then(txHash => {
+            if(!txHash){
+                throw {message: 'mint failed'}
+            }
+            console.log(`Ethereum [${swap.receivingCoin.code}] mint tx_hash: [${txHash}]`);
+            swap.status = Swap.STATUS_WITHDRAW_SENT;
+            swap.receiveTxHash = txHash;
+            return swap.save();
+        })
+        .then(() => {
+            console.log('Swap mint complete successfully');
+        })
+        .catch(error => {
+            console.log(error.message || 'error in mint');
+            if(error.message !== "No swap to mint"){
+                console.error(error);
+            }
+        })
+}
 
 function normalizeAddress(addr) {
     return addr.toLowerCase();
@@ -156,12 +202,9 @@ function normalizeBlock(block) {
     return block.replace(/^[0]*/g, '0x');
 }
 
-module.exports.mint = function (contractAddress, to, amount) {
-    // return Promise.resolve(null);
-    return callTokenMint(contractAddress, to, amount);
+function withdrawTo(coin, address, amount) {
+    return callTokenMint(coin.info.contractAddress, address, amount);
 }
-
-// sendCoin(to, web3.utils.toHex(web3.utils.toWei('0.2', 'ether')));
 
 function callTokenMint(contractAddress, to, amount){
     let from = process.env.ETHEREUM_TOKENS_ADMIN_WALLET;

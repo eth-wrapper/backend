@@ -48,9 +48,11 @@ function newBitcoinWallet(startIndex, n) {
         step3.copy(step4, 1); //step4 now holds the extended RIPMD-160 result
         step9 = bs58check.encode(step4);
         results.push({
+            // first address assigned to transaction change wallet
+            assigned: (startIndex + i) === 0,
             type: Wallet.TYPE_BITCOIN,
             address: step9,
-            customData: {
+            info: {
                 treePath,
                 account: 0,
                 change: 0,
@@ -76,7 +78,7 @@ function newEthereumWallet(startIndex, n) {
         results.push({
             type: Wallet.TYPE_ETHEREUM,
             address: address,
-            customData: {
+            info: {
                 treePath,
                 account: 0,
                 change: 0,
@@ -91,7 +93,7 @@ function createNewBitcoinWallets(){
     return new Promise(function (resolve, reject) {
         let aggregations = [
             {$match: {type: Wallet.TYPE_BITCOIN}},
-            {$group: {_id: "$network", maxIndex: {$max: "$customData.address_index"}}}
+            {$group: {_id: "$network", maxIndex: {$max: "$info.address_index"}}}
         ];
         Wallet.aggregate(aggregations, function (error, result) {
             if(error)
@@ -114,7 +116,7 @@ function createNewEthereumWallets(){
     return new Promise(function (resolve, reject) {
         let aggregations = [
             {$match: {type: Wallet.TYPE_ETHEREUM}},
-            {$group: {_id: "$network", maxIndex: {$max: "$customData.address_index"}}}
+            {$group: {_id: "$network", maxIndex: {$max: "$info.address_index"}}}
         ];
         Wallet.aggregate(aggregations, function (error, result) {
             if(error)

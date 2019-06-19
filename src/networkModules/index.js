@@ -8,7 +8,10 @@ let allModuleNecessaryMethods = [
     'sendCoin',
     'getTransaction',
     'normalizeAddress',
-    'validateWallet'
+    'validateWallet',
+    'withdrawTo',
+    "onWithdrawCronJob",
+    "WITHDRAW_CRON_JOB_TIMES"
 ];
 
 var normalizedPath = path.join(__dirname, "./modules");

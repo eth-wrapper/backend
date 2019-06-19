@@ -11,6 +11,13 @@ module.exports.watchTransactionStatus = watchTransactionStatus;
 module.exports.sendCoin = sendCoin;
 module.exports.validateWallet = validateWallet;
 module.exports.getTransaction = getTransaction;
+module.exports.withdrawTo = withdrawTo;
+module.exports.onWithdrawCronJob = onWithdrawCronJob;
+module.exports.WITHDRAW_CRON_JOB_TIMES = "0 0 0 0 * *";
+
+function onWithdrawCronJob() {
+    return Promise.reject(false);
+}
 
 function normalizeAddress(addr) {
     return addr;
@@ -62,6 +69,10 @@ function normalizeTransaction(tx) {
         },
         //originalTx: tx
     };
+}
+
+function withdrawTo(coin, address, amount) {
+    return Promise.reject({message: "not implemented"});
 }
 
 /**
