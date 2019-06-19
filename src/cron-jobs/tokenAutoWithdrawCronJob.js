@@ -9,6 +9,9 @@ module.exports.start = function () {
     /**
      * constructor(cronTime, onTick, onComplete, start, timezone, context, runOnInit, unrefTimeout)
      */
+    if(!process.env.AUTO_WITHDRAW_ENABLE)
+        return;
+
     Object.keys(networkModules).map(network => {
         makeCronJob(networkModules[network], network);
     })

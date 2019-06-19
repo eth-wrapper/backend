@@ -17,7 +17,7 @@ module.exports.validateWallet = validateWallet;
 module.exports.normalizeAddress = normalizeAddress;
 module.exports.withdrawTo = withdrawTo;
 module.exports.onWithdrawCronJob = onWithdrawCronJob;
-module.exports.WITHDRAW_CRON_JOB_TIMES = "0,15,30,45 * * * * *";
+module.exports.WITHDRAW_CRON_JOB_TIMES = "0 * * * * *"; // every minute
 
 function onWithdrawCronJob() {
     let swap = null;

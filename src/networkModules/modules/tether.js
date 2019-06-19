@@ -13,7 +13,7 @@ module.exports.validateWallet = validateWallet;
 module.exports.getTransaction = getTransaction;
 module.exports.withdrawTo = withdrawTo;
 module.exports.onWithdrawCronJob = onWithdrawCronJob;
-module.exports.WITHDRAW_CRON_JOB_TIMES = "0 0 0 0 * *";
+module.exports.WITHDRAW_CRON_JOB_TIMES = "0 0 0 0 0 0"; // never
 
 function onWithdrawCronJob() {
     return Promise.reject(false);

@@ -21,7 +21,7 @@ module.exports.normalizeAddress = normalizeAddress;
 module.exports.unspentTransactions = unspentTransactions;
 module.exports.withdrawTo = withdrawTo;
 module.exports.onWithdrawCronJob = onWithdrawCronJob;
-module.exports.WITHDRAW_CRON_JOB_TIMES = "5,20,35,50 * * * * *";
+module.exports.WITHDRAW_CRON_JOB_TIMES = "0 0,10,20,30,40,50 * * * *"; // every 10 minutes
 
 function onWithdrawCronJob() {
     let swaps = [];
